@@ -79,7 +79,7 @@ uint8_t peci_get_fan_duty(void) {
         // We only read the CPU temp high value, since a resolution of 1C is
         // good enough
         int8_t cpu_temp_high;
-        int res = i2c_get(&I2C_SMBUS, 0x4C, 0x01, &cpu_temp_high, 1);
+        int res = i2c_get(&I2C_CPU, 0x4C, 0x01, &cpu_temp_high, 1);
         if (res == 1) {
             // Convert from AMD format
             peci_temp = PECI_TEMP(cpu_temp_high);
