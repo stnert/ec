@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use clap::{Arg, App, AppSettings};
+use clap::{AppSettings, Parser};
 use ectool::{
     Access,
     AccessHid,
@@ -16,13 +16,80 @@ use ectool::{
 };
 use hidapi::HidApi;
 use std::{
-    fmt::Display,
     fs,
     process,
-    str::{self, FromStr},
+    str,
     time::Duration,
     thread,
 };
+
+#[derive(Parser)]
+#[clap(rename_all = "snake_case")]
+enum SubCommand {
+    Console,
+    Fan {
+        index: u8,
+        duty: Option<u8>,
+    },
+    Flash {
+        path: String,
+    },
+    FlashBackup {
+        path: String,
+    },
+    Info,
+    Keymap {
+        layer: u8,
+        output: u8,
+        input: u8,
+        value: Option<String>,
+    },
+    LedColor {
+        index: u8,
+        #[clap(validator = |x| parse_color(x).and(Ok(())))]
+        value: Option<String>,
+    },
+    LedValue {
+        index: u8,
+        value: Option<u8>,
+    },
+    LedMode {
+        layer: u8,
+        #[clap(requires = "speed")]
+        mode: Option<u8>,
+        speed: Option<u8>,
+    },
+    LedSave,
+    Matrix,
+    Print {
+        #[clap(required = true)]
+        message: Vec<String>,
+    },
+    SetNoInput {
+        #[clap(parse(try_from_str))]
+        value: bool,
+    },
+}
+
+#[derive(clap::ArgEnum, Clone)]
+enum AccessMode {
+    LpcLinux,
+    LpcSim,
+    Hid,
+}
+
+#[derive(Parser)]
+#[clap(name = "system76_ectool", setting = AppSettings::SubcommandRequired)]
+struct Args {
+    #[clap(
+        long = "access",
+        arg_enum,
+        default_value = "lpc-linux",
+    )]
+    access: AccessMode,
+    #[clap(subcommand)]
+    subcommand: SubCommand,
+}
 
 unsafe fn console(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     //TODO: driver support for reading debug region?
@@ -277,13 +344,6 @@ unsafe fn keymap_set(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input:
     ec.keymap_set(layer, output, input, value)
 }
 
-fn validate_from_str<T: FromStr>(s: &str) -> Result<(), String>
-    where T::Err: Display {
-    s.parse::<T>()
-        .and(Ok(()))
-        .map_err(|err| format!("{}", err))
-}
-
 fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
     let r = u8::from_str_radix(&s[0..2], 16);
     let g = u8::from_str_radix(&s[2..4], 16);
@@ -295,108 +355,20 @@ fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
 }
 
 fn main() {
-    let matches = App::new("system76_ectool")
-        .setting(AppSettings::SubcommandRequired)
-        .arg(Arg::new("access")
-            .long("access")
-            .possible_values(&["lpc-linux", "lpc-sim", "hid"])
-            .default_value("lpc-linux")
-        )
-        .subcommand(App::new("console"))
-        .subcommand(App::new("fan")
-            .arg(Arg::new("index")
-                .validator(validate_from_str::<u8>)
-                .required(true)
-            )
-            .arg(Arg::new("duty")
-                .validator(validate_from_str::<u8>)
-            )
-        )
-        .subcommand(App::new("flash")
-            .arg(Arg::new("path")
-                .required(true)
-            )
-        )
-        .subcommand(App::new("flash_backup")
-            .arg(Arg::new("path")
-                .required(true)
-            )
-        )
-        .subcommand(App::new("info"))
-        .subcommand(App::new("keymap")
-            .arg(Arg::new("layer")
-                .validator(validate_from_str::<u8>)
-                .required(true)
-            )
-            .arg(Arg::new("output")
-                .validator(validate_from_str::<u8>)
-                .required(true)
-            )
-            .arg(Arg::new("input")
-                .validator(validate_from_str::<u8>)
-                .required(true)
-            )
-            .arg(Arg::new("value"))
-        )
-        .subcommand(App::new("led_color")
-            .arg(Arg::new("index")
-                .validator(validate_from_str::<u8>)
-                .required(true)
-            )
-            .arg(Arg::new("value")
-                .validator(|x| parse_color(&x).and(Ok(())))
-            )
-        )
-        .subcommand(App::new("led_value")
-            .arg(Arg::new("index")
-                .validator(validate_from_str::<u8>)
-                .required(true)
-            )
-            .arg(Arg::new("value")
-                .validator(validate_from_str::<u8>)
-            )
-        )
-        .subcommand(App::new("led_mode")
-            .arg(Arg::new("layer")
-                .validator(validate_from_str::<u8>)
-                .required(true)
-            )
-            .arg(Arg::new("mode")
-                .validator(validate_from_str::<u8>)
-                .requires("speed")
-            )
-            .arg(Arg::new("speed")
-                .validator(validate_from_str::<u8>)
-            )
-        )
-        .subcommand(App::new("led_save"))
-        .subcommand(App::new("matrix"))
-        .subcommand(App::new("print")
-            .arg(Arg::new("message")
-                .required(true)
-                .multiple_occurrences(true)
-            )
-        )
-        .subcommand(App::new("set_no_input")
-            .arg(Arg::new("value")
-                .possible_values(&["true", "false"])
-                .required(true)
-            )
-        )
-        .get_matches();
+    let args = Args::parse();
 
     let get_ec = || -> Result<_, Error> {
         unsafe {
-            match matches.value_of("access").unwrap() {
-                "lpc-linux" => {
+            match args.access {
+                AccessMode::LpcLinux => {
                     let access = AccessLpcLinux::new(Duration::new(1, 0))?;
                     Ok(Ec::new(access)?.into_dyn())
                 },
-                "lpc-sim" => {
+                AccessMode::LpcSim => {
                     let access = AccessLpcSim::new(Duration::new(1, 0))?;
                     Ok(Ec::new(access)?.into_dyn())
                 },
-                "hid" => {
+                AccessMode::Hid => {
                     let api = HidApi::new()?;
                     for info in api.device_list() {
                         #[allow(clippy::single_match)]
@@ -412,7 +384,6 @@ fn main() {
                     }
                     Err(hidapi::HidError::OpenHidDeviceError.into())
                 }
-                _ => unreachable!(),
             }
         }
     };
@@ -424,18 +395,16 @@ fn main() {
         }
     };
 
-    match matches.subcommand() {
-        Some(("console", _)) => match unsafe { console(&mut ec) } {
+    match args.subcommand {
+        SubCommand::Console => match unsafe { console(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read console: {:X?}", err);
                 process::exit(1);
             },
         },
-        Some(("fan", sub_m)) => {
-            let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
-            let duty_opt = sub_m.value_of("duty").map(|x| x.parse::<u8>().unwrap());
-            match duty_opt {
+        SubCommand::Fan { index, duty } => {
+            match duty {
                 Some(duty) => match unsafe { fan_set(&mut ec, index, duty) } {
                     Ok(()) => (),
                     Err(err) => {
@@ -452,9 +421,8 @@ fn main() {
                 },
             }
         },
-        Some(("flash", sub_m)) => {
-            let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&mut ec, path, SpiTarget::Main) } {
+        SubCommand::Flash { path } => {
+            match unsafe { flash(&mut ec, &path, SpiTarget::Main) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
@@ -462,9 +430,8 @@ fn main() {
                 },
             }
         },
-        Some(("flash_backup", sub_m)) => {
-            let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&mut ec, path, SpiTarget::Backup) } {
+        SubCommand::FlashBackup { path } => {
+            match unsafe { flash(&mut ec, &path, SpiTarget::Backup) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
@@ -472,18 +439,15 @@ fn main() {
                 },
             }
         },
-        Some(("info", _)) => match unsafe { info(&mut ec) } {
+        SubCommand::Info => match unsafe { info(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read info: {:X?}", err);
                 process::exit(1);
             },
         },
-        Some(("keymap", sub_m)) => {
-            let layer = sub_m.value_of("layer").unwrap().parse::<u8>().unwrap();
-            let output = sub_m.value_of("output").unwrap().parse::<u8>().unwrap();
-            let input = sub_m.value_of("input").unwrap().parse::<u8>().unwrap();
-            match sub_m.value_of("value") {
+        SubCommand::Keymap { layer, output, input, value } => {
+            match value {
                 Some(value_str) => match u16::from_str_radix(value_str.trim_start_matches("0x"), 16) {
                     Ok(value) => match unsafe { keymap_set(&mut ec, layer, output, input, value) } {
                         Ok(()) => (),
@@ -506,11 +470,9 @@ fn main() {
                 },
             }
         },
-        Some(("led_color", sub_m)) => {
-            let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
-            let value = sub_m.value_of("value");
+        SubCommand::LedColor { index, value } => {
             if let Some(value) = value {
-                let (r, g, b) = parse_color(value).unwrap();
+                let (r, g, b) = parse_color(&value).unwrap();
                 match unsafe { ec.led_set_color(index, r, g, b) } {
                     Ok(()) => (),
                     Err(err) => {
@@ -528,9 +490,7 @@ fn main() {
                 }
             }
         },
-        Some(("led_value", sub_m)) => {
-            let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
-            let value = sub_m.value_of("value").map(|x| x.parse::<u8>().unwrap());
+        SubCommand::LedValue { index, value } => {
             if let Some(value) = value {
                 match unsafe { ec.led_set_value(index, value) } {
                     Ok(()) => (),
@@ -552,10 +512,7 @@ fn main() {
                 }
             }
         },
-        Some(("led_mode", sub_m)) => {
-            let layer = sub_m.value_of("layer").unwrap().parse::<u8>().unwrap();
-            let mode = sub_m.value_of("mode").map(|x| x.parse::<u8>().unwrap());
-            let speed = sub_m.value_of("speed").map(|x| x.parse::<u8>().unwrap());
+        SubCommand::LedMode { layer, mode, speed } => {
             if let (Some(mode), Some(speed)) = (mode, speed) {
                 match unsafe { ec.led_set_mode(layer, mode, speed) } {
                     Ok(()) => (),
@@ -577,21 +534,21 @@ fn main() {
                 }
             }
         },
-        Some(("led_save", _)) => match unsafe { ec.led_save() } {
+        SubCommand::LedSave => match unsafe { ec.led_save() } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to save LED settings: {:X?}", err);
                 process::exit(1);
             },
         },
-        Some(("matrix", _)) => match unsafe { matrix(&mut ec) } {
+        SubCommand::Matrix => match unsafe { matrix(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read matrix: {:X?}", err);
                 process::exit(1);
             },
         },
-        Some(("print", sub_m)) => for arg in sub_m.values_of("message").unwrap() {
+        SubCommand::Print { message } => for arg in message {
             let mut arg = arg.to_owned();
             arg.push('\n');
             match unsafe { print(&mut ec, arg.as_bytes()) } {
@@ -602,9 +559,8 @@ fn main() {
                 },
             }
         },
-        Some(("set_no_input", sub_m)) => {
-            let no_input = sub_m.value_of("value").unwrap().parse::<bool>().unwrap();
-            match unsafe { ec.set_no_input(no_input) } {
+        SubCommand::SetNoInput { value } => {
+            match unsafe { ec.set_no_input(value) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to set no_input mode: {:X?}", err);
@@ -612,6 +568,5 @@ fn main() {
                 }
             }
         }
-        _ => unreachable!()
     }
 }
