@@ -4,7 +4,7 @@
 
 #include <board/smfi.h>
 
-#ifdef SERIAL_DEBUGGER
+#ifdef SERIAL_DEBUG
     #include <mcs51/8051.h>
 #endif
 
@@ -21,7 +21,7 @@ int putchar(int c) {
 
     smfi_debug(byte);
 
-#ifdef SERIAL_DEBUGGER
+#ifdef SERIAL_DEBUG
     SBUF = byte;
 #endif
 
