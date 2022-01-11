@@ -11,7 +11,7 @@ CFLAGS+=-DLEVEL=4
 
 # Enable serial debugging
 CFLAGS+=-DSERIAL_DEBUG
-CONSOLE_BAUD?=9600
+CONSOLE_BAUD?=131072
 
 EC=kb9548
 
@@ -23,4 +23,8 @@ console_external:
 	sudo tio -b $(CONSOLE_BAUD) -m INLCRNL -t /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0
 
 flash_external: $(BUILD)/ec.pad
-	sudo /home/jeremy/Projects/flashrom/flashrom -p ch341a_spi -c "KB9548 (EDI)" -V -w $<
+	sudo /home/jeremy/Projects/flashrom/flashrom \
+		--programmer ch341a_spi \
+		--chip "KB9548 (EDI)" \
+		--noverify \
+		--write $<
