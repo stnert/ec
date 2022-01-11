@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+void wdt_disable(void);
+
 volatile uint8_t __xdata __at(0x0E00) WDTCFG;
 
 volatile uint8_t __xdata __at(0x0E01) WDTPF;
