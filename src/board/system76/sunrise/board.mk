@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+EC=kb9548
+
 # Set log level
 # 0 - NONE
 # 1 - ERROR
@@ -13,7 +15,14 @@ CFLAGS+=-DLEVEL=4
 CFLAGS+=-DSERIAL_DEBUG
 CONSOLE_BAUD?=131072
 
-EC=kb9548
+# Set battery I2C bus
+CFLAGS+=-DI2C_SMBUS=I2C_1
+
+# Set smart charger parameters
+CFLAGS+=\
+	-DCHARGER_CHARGE_CURRENT=1536 \
+	-DCHARGER_CHARGE_VOLTAGE=13200 \
+	-DCHARGER_INPUT_CURRENT=3330
 
 $(BUILD)/ec.pad: $(BUILD)/ec.rom
 	cp $< $@

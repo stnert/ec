@@ -2,9 +2,20 @@
 
 #include <stdbool.h>
 
-#include <common/i2c.h>
+#include <ec/i2c.h>
 
-struct I2C;
+struct I2C __code I2C_0 = I2C(0);
+struct I2C __code I2C_1 = I2C(1);
+struct I2C __code I2C_2 = I2C(2);
+struct I2C __code I2C_3 = I2C(3);
+struct I2C __code I2C_4 = I2C(4);
+struct I2C __code I2C_5 = I2C(5);
+
+void i2c_reset(struct I2C * i2c, bool kill) {
+    //TODO: implement
+    i2c = i2c;
+    kill = kill;
+}
 
 int16_t i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
     //TODO: implement

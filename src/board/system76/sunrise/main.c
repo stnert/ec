@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <arch/arch.h>
+#include <board/battery.h>
+#include <board/smbus.h>
 #include <common/debug.h>
 #include <common/version.h>
 #include <ec/gpio.h>
@@ -10,8 +12,20 @@
 int8_t main_cycle = 0;
 
 // GPIO definitions
-Gpio GPIO_KBC_PWR_ON = GPIO(0x7E);
 Gpio GPIO_TXD = GPIO(0x16);
+Gpio GPIO_SCL1 = GPIO(0x46);
+Gpio GPIO_SDA1 = GPIO(0x47);
+Gpio GPIO_KBC_PWR_ON = GPIO(0x7E);
+
+void gpio_init(void) {
+    // Enable GPIO46 (SCL1) alt mode and output
+    gpio_set_function(&GPIO_SCL1, true);
+    gpio_set_output(&GPIO_SCL1, true);
+
+    // Enable GPIO47 (SDA1) alt mode and output
+    gpio_set_function(&GPIO_SDA1, true);
+    gpio_set_output(&GPIO_SDA1, true);
+}
 
 void serial_init(void) {
     // Set serial mode to 1, disable recieve function
@@ -53,6 +67,10 @@ void main(void) {
     init();
 
     INFO("\nSystem76 EC board '%s', version '%s'\n", board(), version());
+
+    // gpio_init();
+    smbus_init();
+    battery_debug();
 
     for (main_cycle = 0; ; main_cycle++) {
         DEBUG("CYCLE %d\n", main_cycle);
