@@ -7,6 +7,7 @@
 
 struct I2C {
     volatile uint8_t __xdata * cfg;
+    volatile uint8_t __xdata * frt;
     volatile uint8_t __xdata * ofh;
     volatile uint8_t __xdata * ofl;
     volatile uint8_t __xdata * pf;
@@ -20,6 +21,7 @@ struct I2C {
 
 #define I2C(NUMBER) { \
     .cfg = &FSMB ## NUMBER ## CFG, \
+    .frt = &FSMB ## NUMBER ## FRT, \
     .ofh = &FSMB ## NUMBER ## OFH, \
     .ofl = &FSMB ## NUMBER ## OFL, \
     .pf = &FSMB ## NUMBER ## PF, \
@@ -47,6 +49,14 @@ volatile uint8_t __xdata __at(0x2110) FSMB2CFG;
 volatile uint8_t __xdata __at(0x2210) FSMB3CFG;
 volatile uint8_t __xdata __at(0x2310) FSMB4CFG;
 volatile uint8_t __xdata __at(0x2410) FSMB5CFG;
+
+// Flexible protocol
+volatile uint8_t __xdata __at(0x1611) FSMB0FRT;
+volatile uint8_t __xdata __at(0x1711) FSMB1FRT;
+volatile uint8_t __xdata __at(0x2111) FSMB2FRT;
+volatile uint8_t __xdata __at(0x2211) FSMB3FRT;
+volatile uint8_t __xdata __at(0x2311) FSMB4FRT;
+volatile uint8_t __xdata __at(0x2411) FSMB5FRT;
 
 // Operating frequency (high)
 volatile uint8_t __xdata __at(0x1613) FSMB0OFH;

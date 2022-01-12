@@ -70,9 +70,9 @@ void main(void) {
 
     // gpio_init();
     smbus_init();
-    battery_debug();
 
     for (main_cycle = 0; ; main_cycle++) {
         DEBUG("CYCLE %d\n", main_cycle);
+        battery_debug();
     }
 }
