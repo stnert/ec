@@ -72,7 +72,8 @@ void main(void) {
     smbus_init();
 
     for (main_cycle = 0; ; main_cycle++) {
-        DEBUG("CYCLE %d\n", main_cycle);
-        battery_debug();
+        if (main_cycle == 0) {
+            battery_event();
+        }
     }
 }

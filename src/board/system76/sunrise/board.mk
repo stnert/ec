@@ -9,7 +9,7 @@ EC=kb9548
 # 3 - INFO
 # 4 - DEBUG
 # 5 - TRACE
-CFLAGS+=-DLEVEL=4
+CFLAGS+=-DLEVEL=5
 
 # Enable serial debugging
 CFLAGS+=-DSERIAL_DEBUG
@@ -24,6 +24,14 @@ CFLAGS+=\
 	-DCHARGER_CHARGE_VOLTAGE=13200 \
 	-DCHARGER_INPUT_CURRENT=3330
 
+# Set battery charging thresholds
+BATTERY_START_THRESHOLD?=0
+BATTERY_END_THRESHOLD?=100
+
+CFLAGS+=\
+	-DBATTERY_START_THRESHOLD=$(BATTERY_START_THRESHOLD) \
+	-DBATTERY_END_THRESHOLD=$(BATTERY_END_THRESHOLD)
+
 $(BUILD)/ec.pad: $(BUILD)/ec.rom
 	cp $< $@
 	truncate -s 163840 $@
@@ -37,3 +45,10 @@ flash_external: $(BUILD)/ec.pad
 		--chip "KB9548 (EDI)" \
 		--noverify \
 		--write $<
+
+original_flash_external:
+	sudo /home/jeremy/Projects/flashrom/flashrom \
+		--programmer ch341a_spi \
+		--chip "KB9548 (EDI)" \
+		--noverify \
+		--write ecsim/sunrise-insyde.rom
