@@ -19,6 +19,7 @@ typedef const struct _Gpio {
 }
 
 bool gpio_get(Gpio * gpio) __reentrant;
+bool gpio_is_set(Gpio * gpio) __reentrant;
 void gpio_set(Gpio * gpio, bool value) __reentrant;
 
 void gpio_set_function(Gpio * gpio, bool value) __reentrant;

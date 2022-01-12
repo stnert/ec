@@ -2,6 +2,20 @@
 
 #include <board/gpio.h>
 
+//TODO: use ADP_DET (0x15) instead?
+Gpio BARREL_ADP_DET_N = GPIO(0x79);
+Gpio BAT_AMBERLED = GPIO(0x19);
+Gpio BAT_WHITELED = GPIO(0x0F);
+Gpio KBC_PWR_ON = GPIO(0x7E);
+Gpio LED_PWRSTBY_N = GPIO(0x54);
+Gpio LID_SW_N = GPIO(0x7C);
+Gpio LPC_RST_N = GPIO(0x05);
+Gpio PWRBTN_N = GPIO(0x7B);
+Gpio PWR_BTN_OUT_N = GPIO(0x6B);
+Gpio RSMRST_N_KBC = GPIO(0x56);
+Gpio SLP_S3_N = GPIO(0x52);
+Gpio SLP_S5_N = GPIO(0x48);
+
 void gpio_init(void) {
     //TODO: AOODC = BIT(2) | BIT(1) | BIT(0);
 

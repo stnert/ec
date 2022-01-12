@@ -3,7 +3,19 @@
 #include <ec/gpio.h>
 
 bool gpio_get(Gpio * gpio) __reentrant {
-    return GPIOIN[gpio->index] & gpio->value == gpio->value;
+    if (GPIOIN[gpio->index] & gpio->value) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool gpio_is_set(Gpio * gpio) __reentrant {
+    if (GPIOD[gpio->index] & gpio->value) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void gpio_set(Gpio * gpio, bool value) __reentrant {
