@@ -1,24 +1,35 @@
- 1 | 24 | PVBAT
- 2 | 23 |
- 3 | 22 | GND
- 4 | 21 |
- 5 | 20 |
- 6 | 19 |
- 7 | 18 |
- 8 | 17 |
- 9 | 16 |
-10 | 15 |
-11 | 14 |
-12 | 13 | LPC_RST#
-13 | 12 |
-14 | 11 |
-15 | 10 |
-16 |  9 | ECRST#
-17 |  8 | SCAN_3S_IN(6) | EDIDI
-18 |  7 | SCAN_3S_IN(5) | EDICLK
-19 |  6 | SCAN_3S_IN(7) | EDIDO
-20 |  5 | SCAN_3S_IN(4) | EDICS
-21 |  4 | TXD
-22 |  3 | P3V3DS
-23 |  2 |
-24 |  1 | GND
+PIN is the pin on the debug header
+A is when using a 24-pin ribbon cable aligned to the first pin
+B is when using a 24-pin ribbon cable aligned to the last pin
+
+PIN |  A |  B | SIGNAL
+  1 | 24 |    | PVBAT
+  2 | 23 |    |
+  3 | 22 |    | GND
+  4 | 21 |    | PCI_3S_SERIRQ
+  5 | 20 |    | NMI_SMI_DBG#
+  6 | 19 |    | LPC_3S_FRAME#
+  7 | 18 | 24 | LPC_3S_AD(3)
+  8 | 17 | 23 | LPC_3S_AD(2)
+  9 | 16 | 22 | LPC_3S_AD(1)
+ 10 | 15 | 21 | LPC_3S_AD(0)
+ 11 | 14 | 20 | CLK_RS3_DEBUG
+ 12 | 13 | 19 | LPC_RST#
+ 13 | 12 | 18 | 8051_TX_LED_PWRSTBY
+ 14 | 11 | 17 | 8051_RX_CAPS_LED
+ 15 | 10 | 16 | NUM_LOCK_LED#
+ 16 |  9 | 15 | ECRST#
+ 17 |  8 | 14 | SCAN_3S_IN(6) | EDIDI
+ 18 |  7 | 13 | SCAN_3S_IN(5) | EDICLK
+ 19 |  6 | 12 | SCAN_3S_IN(7) | EDIDO
+ 20 |  5 | 11 | SCAN_3S_IN(4) | EDICS
+ 21 |  4 | 10 | TXD
+ 22 |  3 |  9 | P3V3DS
+ 23 |  2 |  8 |
+ 24 |  1 |  7 | GND
+ 25 |    |  6 | SWD_IO
+ 26 |    |  5 | SWD_CLK
+ 27 |    |  4 | SWD_XRES
+ 28 |    |  3 | UART0_TXD
+ 29 |    |  2 | UART0_RXD
+ 30 |    |  1 | P5V0DS
