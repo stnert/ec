@@ -7,6 +7,7 @@
 #include <board/board.h>
 #include <board/fan.h>
 #include <board/gpio.h>
+#include <board/kbscan.h>
 #include <board/lid.h>
 #include <board/peci.h>
 #include <board/power.h>
@@ -76,6 +77,7 @@ void init(void) {
 
     // Can happen in any order
     fan_init();
+    kbscan_init();
     peci_init();
     serial_init();
     smbus_init();
@@ -103,11 +105,10 @@ void main(void) {
                 // Handle power states
                 power_event();
                 break;
-            //TODO
-            // case 1:
-            //     // Scans keyboard and sends keyboard packets
-            //     kbscan_event();
-            //     break;
+            case 1:
+                // Scans keyboard and sends keyboard packets
+                kbscan_event();
+                break;
             case 2:
                 // Handle lid close/open
                 lid_event();
