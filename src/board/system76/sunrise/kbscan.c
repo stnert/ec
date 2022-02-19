@@ -32,30 +32,31 @@ void kbscan_init(void) {
 }
 
 void kbscan_event(void) {
-    static uint8_t rows[12] = { 0 };
+    static uint8_t outputs[12] = { 0 };
 
-    for (int row_i = 0; row_i < ARRAY_SIZE(rows); row_i++) {
-        gpio_set_output(&KSO[row_i], true);
+    for (int output_i = 0; output_i < ARRAY_SIZE(outputs); output_i++) {
+        gpio_set_output(&KSO[output_i], true);
 
         delay_ms(20);
 
-        uint8_t row = ~KSI_IN;
+        uint8_t inputs = ~KSI_IN;
 
-        gpio_set_output(&KSO[row_i], false);
+        gpio_set_output(&KSO[output_i], false);
 
-        if (row != rows[row_i]) {
-            for (int col_i = 0; col_i < 8; col_i++) {
-                bool old = rows[row_i] & BIT(col_i);
-                bool new = row & BIT(col_i);
+        if (inputs != outputs[output_i]) {
+            for (int input_i = 0; input_i < 8; input_i++) {
+                bool old = outputs[output_i] & BIT(input_i);
+                bool new = inputs & BIT(input_i);
                 if (old != new) {
+                    uint16_t key = KEYMAP[0][output_i][input_i];
                     if (new) {
-                        DEBUG("%d, %d press\n", row_i, col_i);
+                        DEBUG("%d, %d press 0x%x\n", output_i, input_i, key);
                     } else {
-                        DEBUG("%d, %d release\n", row_i, col_i);
+                        DEBUG("%d, %d release 0x%x\n", output_i, input_i, key);
                     }
                 }
             }
-            rows[row_i] = row;
+            outputs[output_i] = inputs;
         }
     }
 }

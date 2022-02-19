@@ -5,7 +5,7 @@
 
 #include <stdbool.h>
 
-#include <common/keymap.h>
+#include <board/keymap.h>
 
 void kbscan_init(void);
 void kbscan_event(void);
