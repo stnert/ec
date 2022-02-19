@@ -2,6 +2,9 @@
 
 EC=kb9548
 
+KEYBOARD_DIR=src/keyboard/system76/sunrise
+include $(KEYBOARD_DIR)/keyboard.mk
+
 # Set log level
 # 0 - NONE
 # 1 - ERROR
