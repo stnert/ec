@@ -8,6 +8,7 @@
 extern Gpio BARREL_ADP_DET_N;
 extern Gpio BAT_AMBERLED;
 extern Gpio BAT_WHITELED;
+extern Gpio FCH_PWRGD;
 extern Gpio KBC_PWR_ON;
 extern Gpio LED_PWRSTBY;
 extern Gpio LID_SW_N;

@@ -106,11 +106,18 @@ void power_on_s5(void) {
     // 300ms
     GPIO_SET_DEBUG(PWR_BTN_OUT_N, true);
 
+    delay_ms(100); // TODO: best delay
+    // 400ms
+    GPIO_SET_DEBUG(FCH_PWRGD, true);
+
     update_power_state();
 }
 
 void power_off_s5(void) {
     DEBUG("power_off_s5\n");
+
+    GPIO_SET_DEBUG(FCH_PWRGD, false);
+    delay_us(1);
 
     GPIO_SET_DEBUG(RSMRST_N_KBC, false);
 
