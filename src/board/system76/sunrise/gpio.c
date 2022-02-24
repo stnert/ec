@@ -7,7 +7,7 @@ Gpio BARREL_ADP_DET_N = GPIO(0x79);
 Gpio BAT_AMBERLED = GPIO(0x19);
 Gpio BAT_WHITELED = GPIO(0x0F);
 Gpio KBC_PWR_ON = GPIO(0x7E);
-Gpio LED_PWRSTBY_N = GPIO(0x54);
+Gpio LED_PWRSTBY = GPIO(0x54);
 Gpio LID_SW_N = GPIO(0x7C);
 Gpio LPC_RST_N = GPIO(0x05);
 Gpio PWRBTN_N = GPIO(0x7B);
@@ -48,7 +48,7 @@ void gpio_init(void) {
     GPIOFS38 = 0;
     GPIOFS40 = BIT(7) | BIT(6) | BIT(5) | BIT(4);
     GPIOFS48 = BIT(5) | BIT(4) | BIT(3) | BIT(2);
-    GPIOFS50 = BIT(4);
+    GPIOFS50 = 0;
     GPIOFS58 = 0;
     GPIOFS60 = 0;
     GPIOFS68 = 0;

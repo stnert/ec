@@ -235,16 +235,16 @@ void power_event(void) {
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
         // CPU on, power light
-        gpio_set(&LED_PWRSTBY_N, false);
+        gpio_set(&LED_PWRSTBY, true);
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing power light
         if ((time - last_time) >= 1000) {
-            gpio_set(&LED_PWRSTBY_N, !gpio_is_set(&LED_PWRSTBY_N));
+            gpio_set(&LED_PWRSTBY, !gpio_is_set(&LED_PWRSTBY));
             last_time = time;
         }
     } else {
         // CPU off
-        gpio_set(&LED_PWRSTBY_N, true);
+        gpio_set(&LED_PWRSTBY, false);
     }
 
     if (!(battery_status & BATTERY_INITIALIZED)) {
